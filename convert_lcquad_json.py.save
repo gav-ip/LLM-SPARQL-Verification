@@ -1,0 +1,50 @@
+import json
+import jsonlines
+
+def convert(input_path, output_path):
+    print(f"Converting {input_path} → {output_path}")
+
+    with open(input_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # IMPORTANT:
+    # LC-QuAD 2.0 JSON format usually looks like:
+    # {"data": [{ "question": "...", "sparql_query": "..." }, ...]}
+    
+    if "data" in data:
+        entries = data["data"]
+    else:
+        # fallback for alternate format: list of dicts
+        entries = data
+
+    with jsonlines.open(output_path, "w") as writer:
+        for item in entries:
+            question = item.get("question", "").strip()
+            sparql = item.get("sparql_query", "").strip()
+
+            if not question or not sparql:
+                continue
+
+            writer.write({
+                "messages": [
+                    {"role": "user", "content": question},
+                    {"role": "assistant", "content": sparql}
+                ]
+            })
+
+    print("Done!")
+
+def main():
+    convert(
+        "datasets/LC-QuAD2.0-master/dataset/train.json",
+        "lcquad2_train.jsonl"
+    )
+    convert(
+        "datasets/LC-QuAD2.0-master/dataset/test.json",
+        "lcquad2_test.jsonl"
+    )
+
+if __name__ == "__main__":
+    main()
+
+
