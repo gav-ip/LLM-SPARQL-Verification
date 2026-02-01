@@ -95,6 +95,7 @@ def main():
             lambda x: (x[:50] + '...') if len(x) > 50 else x)
         display_df['description'] = display_df['description'].apply(
             lambda x: (x[:40] + '...') if len(str(x)) > 40 else x)
+            
         print(tabulate(display_df, headers='keys', tablefmt='pretty'))
 
         output_file = os.path.join(os.path.dirname(__file__), 'experiment_datasets', 'extracted_wikidata_ids.json')
