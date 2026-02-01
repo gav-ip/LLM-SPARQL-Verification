@@ -14,7 +14,7 @@ def load_hotpot_qa(split="train", subset="distractor", streaming=True):
     """
     print(f"Loading HotpotQA dataset ({subset}, {split})...")
     try:
-        dataset = load_dataset("hotpot_qa", subset, split=split, streaming=streaming)
+        dataset = load_dataset("hotpot_qa", subset, split=split, streaming=streaming, trust_remote_code=True)
         return dataset
     except Exception as e:
         print(f"Error loading dataset: {e}")

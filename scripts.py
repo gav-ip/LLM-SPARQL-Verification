@@ -8,9 +8,10 @@ import json
 sys.path.append(os.path.join(os.path.dirname(__file__), 'experiment_datasets', 'code'))
 
 from hotpot_loader import load_hotpot_qa
+from tabulate import tabulate
 
 
-def setup_pipeline():
+def entity_linker():
     """Initializes the spaCy pipeline with entity linker."""
     try:
         nlp = spacy.load("en_core_web_sm")
@@ -56,7 +57,7 @@ def main():
     # Load HotpotQA dataset using the loader module
     dataset = load_hotpot_qa(split="train", subset="distractor", streaming=True)
     
-    nlp = setup_pipeline()
+    nlp = entity_linker()
     if not nlp:
         return
 
@@ -88,13 +89,19 @@ def main():
     
     if not df.empty:
         print("\nExtracted Entities:")
-        print(df[['original_text', 'entity_text', 'wikidata_id', 'description']].to_string())
-        
-        output_file = "extracted_wikidata_ids.json"
+
+        display_df = df[['original_text', 'entity_text', 'wikidata_id', 'description']].copy()
+        display_df['original_text'] = display_df['original_text'].apply(
+            lambda x: (x[:50] + '...') if len(x) > 50 else x)
+        display_df['description'] = display_df['description'].apply(
+            lambda x: (x[:40] + '...') if len(str(x)) > 40 else x)
+        print(tabulate(display_df, headers='keys', tablefmt='pretty'))
+
+        output_file = os.path.join(os.path.dirname(__file__), 'experiment_datasets', 'extracted_wikidata_ids.json')
         df.to_json(output_file, orient="records", indent=2)
         print(f"\nResults saved to {output_file}")
     else:
-        print("\nNo entities extracted.")
+        print("\nNo entities extacted.")
 
 if __name__ == "__main__":
     main()
